@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel da Batalha</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      color: #f55;
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+      border-radius: 5px;
+    }
+
+    .painel, .guerreiros, .eventos {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 4px 0;
+    }
+.conteudo {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px; /* ← aumente aqui */
+  margin-top: 20px;
+}
+
+.guerreiros, .eventos {
+  flex: 1;
+  background: #222;
+  padding: 15px; /* ← um pouco mais de espaço interno */
+  border-radius: 10px;
+  border: 1px solid #0f0;
+}
+  </style>
+</head>
+<body>
+  <h1>🔥 Batalha ao Vivo 🔥</h1>
+
+  <div class="painel">
+    <button onclick="enviarComando('iniciar')">▶️ Iniciar Batalha</button>
+    <button onclick="enviarComando('resetar')">🔄 Resetar</button>
+  </div>
+
+ <div class="conteudo">
+  <div class="guerreiros">
+    <h2>Guerreiros:</h2>
+    <ul id="lista-guerreiros"></ul>
+  </div>
+
+  <div class="eventos">
+    <h2>Eventos:</h2>
+    <ul id="eventos"></ul>
+  </div>
+</div>
+
+  <script>
+    const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocol}://${location.host}`);
+    socket.onopen = () => {
+      console.log("✅ WebSocket conectado com sucesso.");
+    };
+
+    socket.onerror = (err) => {
+      console.error("❌ WebSocket erro:", err);
+    };
+    
+    const lista = document.getElementById('lista-guerreiros');
+    const eventos = document.getElementById('eventos');
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("escutei?? ",data);
+      if (data.tipo === 'atualizacao') {
+        lista.innerHTML = '';
+        data.guerreiros.forEach(g => {
+          const li = document.createElement('li');
+          li.textContent = g.name;
+          lista.appendChild(li);
+        });
+
+        eventos.innerHTML = '';
+        console.log(data.mensagens);
+        if (Array.isArray(data.mensagens)) {
+            eventos.innerHTML = '';
+            data.mensagens.forEach(msg => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            eventos.appendChild(li);
+        });
+}
+      }
+
+      if (data.tipo === 'evento') {
+        const li = document.createElement('li');
+        li.textContent = data.texto;
+        eventos.appendChild(li);
+      }
+    };
+
+    function enviarComando(acao) {
+      socket.send(JSON.stringify({ comando: acao }));
+    }
+  </script>
+</body>
+</html>
