@@ -26,5 +26,13 @@ Este sistema conecta um bot Twitch que detecta comandos de entrada na batalha (`
 2. Instale dependências e rode o servidor:  
 ```bash
 npm install
-npm start```
+node server.js
+```
 
+3. Agora espere os usuários entrarem e inicie a batalha!
+
+
+
+## 📸 Screenshot do Projeto
+
+![Painel da Batalha](imgs/project.png)
